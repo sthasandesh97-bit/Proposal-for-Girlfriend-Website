@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To My Forever...</title>
+    
+    <!-- Google Fonts: Elegant Serif + Modern Sans-Serif -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <!-- Canvas Confetti Library for the "Yes" celebration -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        /* CSS Variables for 2025 Ultra-Modern Dark Theme */
+        :root {
+            --bg-color: #050505;
+            --text-main: #fcfcfc;
+            --text-muted: #a0a0a0;
+            --accent-gold: #e2b973;
+            --accent-rose: #d65c7a;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --font-serif: 'Cormorant Garamond', serif;
+            --font-sans: 'Outfit', sans-serif;
+        }
+
+        /* Global Reset & Typography */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+            cursor: none; /* Custom cursor */
+        }
+
+        /* Custom Glowing Cursor */
+        .cursor-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent-rose);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 15px var(--accent-rose);
+            transition: width 0.2s, height 0.2s;
+        }
+
+        .cursor-outline {
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(214, 92, 122, 0.5);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9998;
+            transform: translate(-50%, -50%);
+            transition: top 0.15s ease-out, left 0.15s ease-out, width 0.2s, height 0.2s;
+        }
+
+        /* Interactive Particle Canvas */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Layout Container */
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 5%;
+        }
+
+        /* Section Styling */
+        section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        h1, h2 {
+            font-family: var(--font-serif);
+            font-weight: 600;
+            line-height: 1.2;
+        }
+
+        /* Hero Section */
+        .hero h1 {
+            font-size: 4.5rem;
+            background: linear-gradient(45deg, var(--text-main), var(--accent-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+            animation: pulse 2s infinite;
+        }
+
+        /* Memories Gallery (Glassmorphism + Hover tilts) */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            width: 100%;
+            margin-top: 50px;
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 15px;
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5), 0 0 20px rgba(214, 92, 122, 0.2);
+        }
+
+        .glass-card img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            filter: grayscale(20%) contrast(110%);
+            transition: filter 0.4s ease;
+        }
+
+        .glass-card:hover img {
+            filter: grayscale(0%) contrast(100%);
+        }
+
+        .glass-card p {
+            font-family: var(--font-serif);
+            font-style: italic;
+            font-size: 1.3rem;
+            color: var(--accent-gold);
+        }
+
+        /* Proposal Section */
+        .proposal-container {
+            background: radial-gradient(circle at center, rgba(214, 92, 122, 0.1) 0%, transparent 70%);
+            padding: 80px 40px;
+            border-radius: 30px;
+            width: 100%;
+            position: relative;
+        }
+
+        .proposal-container h2 {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: var(--text-main);
+            text-shadow: 0 0 20px rgba(214, 92, 122, 0.4);
+        }
+
+        .buttons {
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            position: relative;
+            height: 60px; /* To maintain height when NO button moves */
+        }
+
+        .btn {
+            font-family: var(--font-sans);
+            font-size: 1.2rem;
+            padding: 15px 40px;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-yes {
+            background: linear-gradient(135deg, var(--accent-rose), #ff8a9c);
+            color: white;
+            box-shadow: 0 0 20px rgba(214, 92, 122, 0.4);
+        }
+
+        .btn-yes:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(214, 92, 122, 0.6);
+        }
+
+        .btn-no {
+            background: var(--glass-bg);
+            color: var(--text-main);
+            border: 1px solid var(--glass-border);
+            position: relative; /* Allows it to become absolute via JS */
+        }
+
+        #success-message {
+            display: none;
+            font-family: var(--font-serif);
+            font-size: 3rem;
+            color: var(--accent-gold);
+            margin-top: 30px;
+            animation: fadeIn 1s ease forwards;
+        }
+
+        /* Keyframes */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; transform: translate(-50%, 0); }
+            50% { opacity: 1; transform: translate(-50%, 10px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 3rem; }
+            .proposal-container h2 { font-size: 2.5rem; }
+            .cursor-dot, .cursor-outline { display: none; } /* Disable custom cursor on mobile */
+            body { cursor: auto; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Custom Cursor -->
+    <div class="cursor-dot" id="cursor-dot"></div>
+    <div class="cursor-outline" id="cursor-outline"></div>
+
+    <!-- Background Animation -->
+    <canvas id="particle-canvas"></canvas>
+
+    <div class="container">
+        <!-- Section 1: Hero Intro -->
+        <section class="hero" id="sec-1">
+            <h1>To My Everything</h1>
+            <p>Every once in a while, in the middle of an ordinary life, love gives us a fairy tale. This is the beginning of ours...</p>
+            <div class="scroll-indicator">SCROLL DOWN ↓</div>
+        </section>
+
+        <!-- Section 2: Memories / The Journey -->
+        <section id="sec-2">
+            <h2>Our Beautiful Journey</h2>
+            <p style="color: var(--text-muted); margin-top: 10px;">Every moment with you is my favorite.</p>
+            
+            <div class="gallery-grid">
+                <!-- Replace src with your own couple pictures -->
+                <div class="glass-card">
+                    <img src="https://images.unsplash.com/photo-1518133835878-5a93cc3f89e5?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Couple memory 1">
+                    <p>"The day my life changed..."</p>
+                </div>
+                <div class="glass-card">
+                    <img src="https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Couple memory 2">
+                    <p>"Lost in your eyes."</p>
+                </div>
+                <div class="glass-card">
+                    <img src="https://images.unsplash.com/photo-1606905541656-7871b693e439?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Couple memory 3">
+                    <p>"My favorite place is next to you."</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: The Reason -->
+        <section id="sec-3">
+            <div style="max-width: 700px;">
+                <h2 style="font-size: 3rem; margin-bottom: 20px;">You are my home.</h2>
+                <p style="font-size: 1.2rem; line-height: 1.8; color: #ccc;">
+                    You are the first person I want to talk to when I wake up, and the last person I want to see before I fall asleep. 
+                    You make the dark days bright and the good days unforgettable. I can't imagine a single tomorrow without you in it.
+                </p>
+            </div>
+        </section>
+
+        <!-- Section 4: The Climax / Proposal -->
+        <section id="sec-4">
+            <div class="proposal-container">
+                <h2>Will you marry me?</h2>
+                <p style="color: var(--text-muted);">Make me the happiest person in the universe.</p>
+                
+                <div class="buttons">
+                    <button class="btn btn-yes" id="btn-yes">YES!</button>
+                    <button class="btn btn-no" id="btn-no">No</button>
+                </div>
+                <div id="success-message">I love you forever! ❤️💍</div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // --- Custom Cursor Logic ---
+        const cursorDot = document.getElementById('cursor-dot');
+        const cursorOutline = document.getElementById('cursor-outline');
+
+        window.addEventListener('mousemove', (e) => {
+            const posX = e.clientX;
+            const posY = e.clientY;
+            
+            cursorDot.style.left = `${posX}px`;
+            cursorDot.style.top = `${posY}px`;
+            
+            cursorOutline.style.left = `${posX}px`;
+            cursorOutline.style.top = `${posY}px`;
+        });
+
+        // Hover effect for buttons & cards
+        document.querySelectorAll('button, .glass-card').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                cursorOutline.style.width = '60px';
+                cursorOutline.style.height = '60px';
+                cursorOutline.style.backgroundColor = 'rgba(214, 92, 122, 0.1)';
+            });
+            el.addEventListener('mouseleave', () => {
+                cursorOutline.style.width = '40px';
+                cursorOutline.style.height = '40px';
+                cursorOutline.style.backgroundColor = 'transparent';
+            });
+        });
+
+        // --- Scroll Intersection Observer for smooth reveal ---
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.2 });
+
+        document.querySelectorAll('section').forEach(sec => observer.observe(sec));
+
+        // --- Interactive Interactive "No" Button Logic ---
+        const btnNo = document.getElementById('btn-no');
+        const btnYes = document.getElementById('btn-yes');
+        const successMessage = document.getElementById('success-message');
+
+        btnNo.addEventListener('mouseover', () => {
+            // Make button position absolute so it can jump around
+            btnNo.style.position = 'absolute';
+            
+            // Calculate random positions within a safe boundary
+            const x = Math.random() * 200 - 100; // -100px to 100px
+            const y = Math.random() * 150 - 75;  // -75px to 75px
+            
+            btnNo.style.transform = `translate(${x}px, ${y}px)`;
+        });
+
+        // Mobile fallback for the "No" button
+        btnNo.addEventListener('click', (e) => {
+            e.preventDefault();
+            btnNo.innerText = "Are you sure? 🥺";
+        });
+
+        // --- "Yes" Button Confetti & Celebration ---
+        btnYes.addEventListener('click', () => {
+            // Hide buttons
+            document.querySelector('.buttons').style.display = 'none';
+            // Show Success Message
+            successMessage.style.display = 'block';
+
+            // Fire Canvas Confetti
+            var duration = 5 * 1000;
+            var animationEnd = Date.now() + duration;
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 10000 };
+
+            function randomInRange(min, max) {
+              return Math.random() * (max - min) + min;
+            }
+
+            var interval = setInterval(function() {
+              var timeLeft = animationEnd - Date.now();
+
+              if (timeLeft <= 0) {
+                return clearInterval(interval);
+              }
+
+              var particleCount = 50 * (timeLeft / duration);
+              // since particles fall down, start a bit higher than random
+              confetti(Object.assign({}, defaults, { particleCount,
+                origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+              }));
+              confetti(Object.assign({}, defaults, { particleCount,
+                origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+              }));
+            }, 250);
+        });
+
+        // --- Background Particle Canvas (Dust / Magic feel) ---
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        let width, height;
+        let particles =
